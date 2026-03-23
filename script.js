@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const formData = {
                 empresa: document.getElementById('empresa').value,
+                colaboradores: document.getElementById('colaboradores').value,
                 nome: document.getElementById('responsavel').value,
                 telefone: document.getElementById('whatsapp').value,
                 email: document.getElementById('email').value

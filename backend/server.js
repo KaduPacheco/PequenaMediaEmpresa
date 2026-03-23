@@ -26,7 +26,7 @@ app.use(express.json());
 
 // Rota POST /leads
 app.post('/leads', async (req, res) => {
-  const { nome, email, telefone, empresa } = req.body;
+  const { nome, email, telefone, empresa, colaboradores } = req.body;
 
   // Validação básica
   if (!nome || !email) {
@@ -35,19 +35,34 @@ app.post('/leads', async (req, res) => {
 
   try {
     const query = `
-      INSERT INTO leads (nome, email, telefone, empresa) 
-      VALUES ($1, $2, $3, $4) 
+      INSERT INTO leads (nome, email, telefone, empresa, colaboradores) 
+      VALUES ($1, $2, $3, $4, $5) 
       RETURNING *;
     `;
-    const values = [nome, email, telefone, empresa];
+    const values = [nome, email, telefone, empresa, colaboradores];
     
     // Executando a query de forma assíncrona
     const result = await pool.query(query, values);
+    const newLead = result.rows[0];
+
+    // Enviar Webhook em segundo plano (não trava a resposta)
+    fetch('https://n8n.forteia.com.br/webhook/leads', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            nome: newLead.nome,
+            email: newLead.email,
+            telefone: newLead.telefone,
+            empresa: newLead.empresa,
+            colaboradores: newLead.colaboradores,
+            created_at: newLead.created_at
+        })
+    }).catch(err => console.error('Erro ao chamar webhook do n8n:', err.message));
 
     // Retornando resposta de sucesso
     return res.status(201).json({
       message: 'Lead salvo com sucesso!',
-      lead: result.rows[0]
+      lead: newLead
     });
   } catch (error) {
     console.error('Erro ao salvar o lead no banco de dados:', error);
