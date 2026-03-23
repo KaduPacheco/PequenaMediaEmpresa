@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             try {
-                const response = await fetch('http://localhost:3002/leads', {
+                const response = await fetch('http://89.116.74.62:3002/leads', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
