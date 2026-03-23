@@ -40,23 +40,23 @@ app.post('/leads', async (req, res) => {
       RETURNING *;
     `;
     const values = [nome, email, telefone, empresa, colaboradores];
-    
+
     // Executando a query de forma assíncrona
     const result = await pool.query(query, values);
     const newLead = result.rows[0];
 
     // Enviar Webhook em segundo plano (não trava a resposta)
     fetch('https://n8n.forteia.com.br/webhook/leads', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            nome: newLead.nome,
-            email: newLead.email,
-            telefone: newLead.telefone,
-            empresa: newLead.empresa,
-            colaboradores: newLead.colaboradores,
-            created_at: newLead.created_at
-        })
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nome: newLead.nome,
+        email: newLead.email,
+        telefone: newLead.telefone,
+        empresa: newLead.empresa,
+        colaboradores: newLead.colaboradores,
+        created_at: newLead.created_at
+      })
     }).catch(err => console.error('Erro ao chamar webhook do n8n:', err.message));
 
     // Retornando resposta de sucesso
